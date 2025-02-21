@@ -1,70 +1,64 @@
-use actix_web::{App, HttpResponse, HttpServer, Responder, web}; // Import Actix Web modules
+use actix_web::{web, App, HttpResponse, HttpServer, Responder}; // Import Actix Web modules
 use lazy_static::lazy_static; // Ensure shared static memory (for URL storage)
-use rand::Rng; // Import random number generator
 use std::collections::HashMap; // HashMap for in-memory storage
 use std::sync::Mutex; // Thread-safe storage for HashMap
 
-// ✅ In-memory URL storage with Mutex for thread safety
+// ✅ In-memory URL storage
 lazy_static! {
     static ref URL_STORE: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
 }
 
-// ✅ Struct to handle incoming JSON requests
+// ✅ Struct for incoming JSON request
 #[derive(serde::Deserialize)]
 struct UrlRequest {
-    long_url: String, // The long URL to be shortened
+    long_url: String,  // The original long URL
+    short_url: String, // Custom short URL provided by the user
 }
 
-// ✅ Function to generate a random 6-character short code
-fn generate_short_code() -> String {
-    let charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let mut rng = rand::thread_rng();
-    (0..6)
-        .map(|_| {
-            charset
-                .chars()
-                .nth(rng.gen_range(0..charset.len()))
-                .unwrap()
-        })
-        .collect()
-}
-
-// ✅ API endpoint: Shorten a URL
+// ✅ API: Shorten URL with user-defined short URL
 async fn shorten_url(req: web::Json<UrlRequest>) -> impl Responder {
-    let mut store = URL_STORE.lock().unwrap(); // Lock HashMap for writing
-    let short_code = generate_short_code(); // Generate short code
-    store.insert(short_code.clone(), req.long_url.clone()); // Store mapping
-    HttpResponse::Ok().json(format!(
-        "Shortened URL: http://127.0.0.1:8080/{}",
-        short_code
-    ))
+    let mut store = URL_STORE.lock().unwrap();
+
+    // Check if the short URL is already taken
+    if store.contains_key(&req.short_url) {
+        return HttpResponse::BadRequest()
+            .body("Short URL already exists. Choose a different one.");
+    }
+
+    // Store the mapping
+    store.insert(req.short_url.clone(), req.long_url.clone());
+
+    // Construct full short URL
+    let full_short_url = format!("http://127.0.0.1:8080/{}", req.short_url);
+
+    HttpResponse::Ok().json(format!("Shortened URL: {}", full_short_url))
 }
 
-// ✅ API endpoint: Redirect to the original URL
+// ✅ API: Redirect to original URL
 async fn redirect_to_original(path: web::Path<String>) -> impl Responder {
-    let store = URL_STORE.lock().unwrap(); // Lock HashMap for reading
+    let store = URL_STORE.lock().unwrap();
     if let Some(long_url) = store.get(&path.into_inner()) {
         HttpResponse::TemporaryRedirect()
-            .append_header(("Location", long_url.clone())) // Redirect to long URL
+            .append_header(("Location", long_url.clone()))
             .finish()
     } else {
-        HttpResponse::NotFound().body("URL not found") // Error if short code is invalid
+        HttpResponse::NotFound().body("URL not found")
     }
 }
 
-// ✅ New API endpoint: Serve a simple homepage at "/"
+// ✅ Home Page
 async fn home_page() -> impl Responder {
     HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8") // ✅ Ensure proper UTF-8 encoding
+        .content_type("text/html; charset=utf-8")
         .body(
             "<h1>Welcome to Rust URL Shortener 🚀</h1>
             <p>Use <code>/shorten</code> to create a short URL.</p>
-            <p>Example: Send a <code>POST</code> request with JSON <code>{\"long_url\": \"https://example.com\"}</code> to <code>/shorten</code>.</p>
-            <p>Then, access your short URL at <code>http://127.0.0.1:8080/{short_code}</code>.</p>",
+            <p>Example: Send a <code>POST</code> request with JSON <code>{\"long_url\": \"https://example.com\", \"short_url\": \"mediamonitoring\"}</code> to <code>/shorten</code>.</p>
+            <p>Then, access your short URL at <code>http://127.0.0.1:8080/mediamonitoring</code>.</p>",
         )
 }
 
-// ✅ Main function: Start the Actix Web server
+// ✅ Main function: Start server
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let port = 8080;
@@ -72,11 +66,11 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-            .route("/", web::get().to(home_page)) // New home route!
+            .route("/", web::get().to(home_page)) // Home page
             .route("/shorten", web::post().to(shorten_url)) // POST /shorten - Create short URL
             .route("/{short_code}", web::get().to(redirect_to_original)) // GET /{short_code} - Redirect
     })
-    .bind(("127.0.0.1", port))? // Bind to local host and port
+    .bind(("127.0.0.1", port))?
     .run()
     .await
 }
