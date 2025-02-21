@@ -1,7 +1,6 @@
 # 🚀 Rust URL Shortener
 
-A simple **URL Shortener** built with **Rust** and **Actix Web**, using in-memory storage (`HashMap`).  
-This project provides a lightweight, fast, and efficient way to shorten URLs **without a database**.
+A simple **URL Shortener** built with **Rust** and **Actix Web**, using in-memory storage (`HashMap`).
 
 ## 🌟 Features
 
