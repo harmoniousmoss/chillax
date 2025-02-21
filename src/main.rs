@@ -52,6 +52,18 @@ async fn redirect_to_original(path: web::Path<String>) -> impl Responder {
     }
 }
 
+// ✅ New API endpoint: Serve a simple homepage at "/"
+async fn home_page() -> impl Responder {
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8") // ✅ Ensure proper UTF-8 encoding
+        .body(
+            "<h1>Welcome to Rust URL Shortener 🚀</h1>
+            <p>Use <code>/shorten</code> to create a short URL.</p>
+            <p>Example: Send a <code>POST</code> request with JSON <code>{\"long_url\": \"https://example.com\"}</code> to <code>/shorten</code>.</p>
+            <p>Then, access your short URL at <code>http://127.0.0.1:8080/{short_code}</code>.</p>",
+        )
+}
+
 // ✅ Main function: Start the Actix Web server
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -60,6 +72,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
+            .route("/", web::get().to(home_page)) // New home route!
             .route("/shorten", web::post().to(shorten_url)) // POST /shorten - Create short URL
             .route("/{short_code}", web::get().to(redirect_to_original)) // GET /{short_code} - Redirect
     })
