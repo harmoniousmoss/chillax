@@ -1,4 +1,4 @@
-## 🚀 Dea URL Shortener - Web API Service
+## 🚀 Dhea - URL Shortener Web API Service
 
 Dhea is URL shortening web service built with Rust and Actix Web framework, featuring custom short code creation and automatic redirection. Implements in-memory storage with thread-safe HashMap operations, RESTful API design, and comprehensive error handling.
 
