@@ -1,8 +1,8 @@
 ![Chillax](https://icbotbz40ngrmv6r.public.blob.vercel-storage.com/chillax-frontend.png)
 
-## 🚀 Chillax - URL Shortener Web API Service
+## 🚀 Chillax - URL Shortener
 
-Chillax is URL shortening web service built with Rust and Actix Web framework, featuring custom short code creation and automatic redirection. Implements in-memory storage with thread-safe HashMap operations, RESTful API design, and comprehensive error handling.
+Chillax creates short, custom links from long URLs, making them easier to share and remember.
 
 ## 🌟 Features
 
