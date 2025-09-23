@@ -1,4 +1,4 @@
-![Chillax](https://icbotbz40ngrmv6r.public.blob.vercel-storage.com/Chillax.png)
+![Chillax](https://icbotbz40ngrmv6r.public.blob.vercel-storage.com/chillax-frontend.png)
 
 ## 🚀 Chillax - URL Shortener Web API Service
 
