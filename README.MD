@@ -1,4 +1,4 @@
-![Chillax Screenshot](https://icbotbz40ngrmv6r.public.blob.vercel-storage.com/Chillax.png)
+<img src="https://icbotbz40ngrmv6r.public.blob.vercel-storage.com/Chillax.png" alt="Chillax Screenshot" width="600">
 
 ## 🚀 Chillax - URL Shortener Web API Service
 
