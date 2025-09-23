@@ -1,4 +1,5 @@
 use actix_web::{web, App, HttpResponse, HttpServer, Responder}; // Import Actix Web modules
+use actix_cors::Cors; // CORS support
 use lazy_static::lazy_static; // Ensure shared static memory (for URL storage)
 use std::collections::HashMap; // HashMap for in-memory storage
 use std::sync::Mutex; // Thread-safe storage for HashMap
@@ -65,7 +66,13 @@ async fn main() -> std::io::Result<()> {
     println!("🚀 URL Shortener running on http://127.0.0.1:{}", port);
 
     HttpServer::new(|| {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header();
+
         App::new()
+            .wrap(cors)
             .route("/", web::get().to(home_page)) // Home page
             .route("/shorten", web::post().to(shorten_url)) // POST /shorten - Create short URL
             .route("/{short_code}", web::get().to(redirect_to_original)) // GET /{short_code} - Redirect
